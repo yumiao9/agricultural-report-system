@@ -5,6 +5,7 @@ from fastapi.responses import HTMLResponse
 
 from backend.config import settings
 from backend.services.cache import get_report_history, get_report_by_id
+from backend.routers.research_steps import _get_report as get_task
 
 router = APIRouter()
 
@@ -33,6 +34,20 @@ async def history_page(request: Request):
     reports = await get_report_history(limit=50)
     template = templates.get_template("history.html")
     return template.render(reports=reports)
+
+
+@router.get("/research/{report_id}", response_class=HTMLResponse)
+async def research_poll_page(request: Request, report_id: str):
+    """Research progress polling page."""
+    task = await get_task(report_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    template = templates.get_template("research_poll.html")
+    return template.render(
+        task_id=report_id,
+        query=task.query or "",
+        configured=settings.is_configured,
+    )
 
 
 @router.get("/report/{report_id}", response_class=HTMLResponse)

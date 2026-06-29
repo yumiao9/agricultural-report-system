@@ -1,64 +1,44 @@
-"""Research endpoint with SSE progress streaming."""
+"""Research endpoint — creates task and returns immediately."""
 
-import asyncio
-import json
+import uuid
 
-from fastapi import APIRouter, Request
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter
+from sqlalchemy import update
 
+from backend.models.database import async_session_factory
+from backend.models.report import Report
 from backend.models.schemas import ResearchRequest
-from backend.services.orchestrator import ResearchOrchestrator
-from backend.services.progress import ProgressEmitter
 from backend.utils.logger import orchestrator_logger
 
 router = APIRouter()
 
-# Singleton orchestrator
-_orchestrator = ResearchOrchestrator()
-
 
 @router.post("/research")
 async def start_research(request: ResearchRequest):
-    """Start a research task, stream progress via SSE.
+    """Create a research task and return immediately.
 
-    The client receives progress events during research, and a
-    'complete' event with report_id when the report is ready.
+    The client then polls /api/research/{task_id}/status and calls
+    step endpoints sequentially.
     """
     orchestrator_logger.info(f"Research request: {request.query} (force_refresh={request.force_refresh})")
 
-    progress = ProgressEmitter()
-
-    # Launch research in background
-    async def run_research():
-        try:
-            result = await _orchestrator.execute(
-                query=request.query,
-                progress=progress,
-                force_refresh=request.force_refresh,
-            )
-            return result
-        except Exception as e:
-            orchestrator_logger.error(f"Research failed: {e}")
-            progress.error(f"研究过程出错: {str(e)[:200]}")
-            return None
-
-    # Start research task
-    task = asyncio.create_task(run_research())
-
-    async def sse_generator():
-        """SSE stream that sends progress events until complete."""
-        async for event in progress.stream():
-            yield event
-
-        # Ensure task completes
-        await task
-
-    return StreamingResponse(
-        sse_generator(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",
-        },
+    report_id = uuid.uuid4().hex[:12]
+    report = Report(
+        id=report_id,
+        query=request.query,
+        query_hash="pending",
+        entity_type="pending",
+        entity_name=request.query,
+        status="pending",
+        step_data={"query": request.query},
     )
+
+    async with async_session_factory() as session:
+        session.add(report)
+        await session.commit()
+
+    return {
+        "task_id": report_id,
+        "status": "pending",
+        "url": f"/research/{report_id}",
+    }

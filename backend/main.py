@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from backend.config import settings
 from backend.models.database import init_db, close_db
-from backend.routers import research, reports, pages
+from backend.routers import research, research_steps, reports, pages
 
 
 @asynccontextmanager
@@ -40,6 +40,7 @@ except Exception:
 # Routers
 app.include_router(pages.router)
 app.include_router(research.router, prefix="/api")
+app.include_router(research_steps.router, prefix="/api")
 app.include_router(reports.router, prefix="/api")
 
 

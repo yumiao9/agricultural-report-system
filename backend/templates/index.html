@@ -150,9 +150,8 @@ function researchForm() {
       if (!this.query.trim() || this.isResearching) return;
       this.isResearching = true;
       this.errorMessage = '';
-      this.percent = 0;
-      this.stageIndex = 0;
-      this.statusMessage = '启动中...';
+      this.percent = 10;
+      this.statusMessage = '正在创建研究任务...';
       this.suggestions = [];
       try {
         const resp = await fetch('/api/research', {
@@ -161,21 +160,11 @@ function researchForm() {
           body: JSON.stringify({ query: this.query.trim(), force_refresh: this.forceRefresh }),
         });
         if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const reader = resp.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop();
-          for (const line of lines) {
-            if (line.startsWith('event: progress')) continue;
-            if (line.startsWith('data: ')) {
-              try { this.handleEvent(JSON.parse(line.slice(6))); } catch (e) {}
-            }
-          }
+        const data = await resp.json();
+        if (data.task_id) {
+          window.location.href = `/research/${data.task_id}`;
+        } else {
+          throw new Error('未获取到任务ID');
         }
       } catch (e) {
         this.errorMessage = e.message.includes('HTTP') ? '服务器错误，请稍后重试' : '网络连接失败，请检查网络';

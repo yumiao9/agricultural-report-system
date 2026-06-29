@@ -32,6 +32,11 @@ class Report(Base):
     html_content = Column(Text, nullable=True)
     report_json = Column(JSON, nullable=True)  # Structured data
 
+    # Research pipeline status
+    status = Column(String(20), default="pending", index=True)
+    step_data = Column(JSON, nullable=True)  # Intermediate data between steps
+    error_message = Column(String(500), nullable=True)
+
     # Metadata
     sources_count = Column(Integer, default=0)
     data_points_count = Column(Integer, default=0)
