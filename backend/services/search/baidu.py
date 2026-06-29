@@ -1,5 +1,7 @@
 """Baidu search provider — targets Chinese web content."""
 
+import re
+
 from backend.services.search.base import SearchProvider, SearchResult
 from backend.utils.logger import search_logger
 
@@ -8,6 +10,20 @@ class BaiduSearch(SearchProvider):
     """Baidu web search via public interface."""
 
     name = "baidu"
+
+    async def _resolve_url(self, client, baidu_url: str) -> str:
+        """Resolve a Baidu redirect URL to the actual destination."""
+        if "baidu.com/link" not in baidu_url and "baidu.com/s" not in baidu_url:
+            return baidu_url
+        try:
+            resp = await client.head(baidu_url, follow_redirects=True, timeout=5.0)
+            if resp.url:
+                final = str(resp.url)
+                if "baidu.com" not in final:
+                    return final
+        except Exception:
+            pass
+        return baidu_url
 
     async def search(self, query: str, num: int = 10) -> list[SearchResult]:
         """Search Baidu for the given query."""
@@ -33,21 +49,28 @@ class BaiduSearch(SearchProvider):
                 soup = BeautifulSoup(resp.text, "lxml")
                 results = []
 
-                for item in soup.select(".result, .c-container"):
+                for item in soup.select(".result, .c-container, .c-result"):
                     title_el = item.select_one("h3 a, .t a")
                     if not title_el:
                         continue
                     title = title_el.get_text(strip=True)
                     href = title_el.get("href", "")
-                    snippet_el = item.select_one(".c-abstract, .content-right_8Zs40, .c-span-last")
+                    if not href or not title:
+                        continue
+
+                    snippet_el = item.select_one(".c-abstract, .content-right_8Zs40, .c-span-last, .c-color-gray")
                     snippet = snippet_el.get_text(strip=True) if snippet_el else ""
 
-                    if href and title:
-                        results.append(SearchResult(
-                            title=title,
-                            url=href,
-                            snippet=snippet,
-                        ))
+                    # Resolve Baidu redirect to actual URL
+                    actual_url = await self._resolve_url(client, href)
+                    if "baidu.com" in actual_url:
+                        actual_url = href
+
+                    results.append(SearchResult(
+                        title=title,
+                        url=actual_url,
+                        snippet=snippet,
+                    ))
 
                 search_logger.info(f"Baidu returned {len(results)} results")
                 return results

@@ -191,8 +191,8 @@ async def step_fetch(report_id: str):
     sd = report.step_data or {}
     search_results = sd.get("search_results", [])
 
-    urls = [r["url"] for r in search_results[:3]]
-    fetched_pages = await fetch_pages(urls, max_concurrent=2, timeout=6.0)
+    urls = [r["url"] for r in search_results[:5] if r.get("url")]
+    fetched_pages = await fetch_pages(urls, max_concurrent=3, timeout=8.0)
 
     pages_data = [{"url": p["url"], "title": p["title"], "text_content": p["text_content"],
                    "fetch_success": p["fetch_success"]} for p in fetched_pages]
@@ -226,8 +226,8 @@ async def step_extract(report_id: str):
 
     try:
         data_points = await asyncio.wait_for(
-            extract_data_from_pages(fetched_pages, entity_name, max_concurrent=1),
-            timeout=8.0,
+            extract_data_from_pages(fetched_pages, entity_name, max_concurrent=2),
+            timeout=12.0,
         )
         verified = await verify_data_points(data_points)
     except Exception as e:
