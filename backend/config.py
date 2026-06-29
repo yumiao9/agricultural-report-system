@@ -31,7 +31,8 @@ class Settings:
     ENABLE_CHINESE_OFFICIAL: bool = os.getenv("ENABLE_CHINESE_OFFICIAL", "true").lower() == "true"
 
     # Application
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./data/reports.db")
+    _raw_db_url: str = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./data/reports.db")
+    DATABASE_URL: str = _raw_db_url.replace("postgresql://", "postgresql+asyncpg://") if _raw_db_url.startswith("postgresql://") else _raw_db_url
     CACHE_TTL_HOURS: int = int(os.getenv("CACHE_TTL_HOURS", "168"))
     SEARCH_TIMEOUT_SECONDS: int = int(os.getenv("SEARCH_TIMEOUT_SECONDS", "120"))
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")

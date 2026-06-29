@@ -11,6 +11,7 @@ lxml>=5.0.0
 # Database
 sqlalchemy[asyncio]>=2.0.0
 aiosqlite>=0.20.0
+asyncpg>=0.30.0
 
 # Web search
 duckduckgo-search>=7.0.0
