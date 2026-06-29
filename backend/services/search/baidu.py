@@ -61,14 +61,10 @@ class BaiduSearch(SearchProvider):
                     snippet_el = item.select_one(".c-abstract, .content-right_8Zs40, .c-span-last, .c-color-gray")
                     snippet = snippet_el.get_text(strip=True) if snippet_el else ""
 
-                    # Resolve Baidu redirect to actual URL
-                    actual_url = await self._resolve_url(client, href)
-                    if "baidu.com" in actual_url:
-                        actual_url = href
-
+                    # Use URL directly, fetcher will follow redirects
                     results.append(SearchResult(
                         title=title,
-                        url=actual_url,
+                        url=href,
                         snippet=snippet,
                     ))
 

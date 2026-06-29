@@ -28,11 +28,12 @@ router = APIRouter()
 
 
 def _build_search_manager() -> SearchManager:
-    providers = [DuckDuckGoSearch()]
-    if settings.ENABLE_CHINESE_OFFICIAL:
-        providers.append(ChineseOfficialSourceSearch())
+    providers = []
     if settings.ENABLE_BAIDU:
         providers.append(BaiduSearch())
+    providers.append(DuckDuckGoSearch())
+    if settings.ENABLE_CHINESE_OFFICIAL:
+        providers.append(ChineseOfficialSourceSearch())
     return SearchManager(providers)
 
 
