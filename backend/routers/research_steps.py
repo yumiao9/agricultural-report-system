@@ -14,7 +14,7 @@ from backend.services.entity_classifier import classify_entity
 from backend.services.search.duckduckgo import DuckDuckGoSearch
 from backend.services.search.baidu import BaiduSearch
 from backend.services.search.chinese_sources import ChineseOfficialSourceSearch
-from backend.services.search.base import SearchManager
+from backend.services.search.base import SearchManager, SearchResult
 from backend.services.fetcher import fetch_pages
 from backend.services.simple_extractor import extract_from_pages as extract_data_regex
 from backend.services.extractor import extract_data_from_pages as extract_data_llm
@@ -143,23 +143,26 @@ async def step_search(report_id: str):
     manager = _build_search_manager()
     all_results = []
 
-    # Try each provider individually with short timeout
     for provider in manager.providers:
         try:
             results = await asyncio.wait_for(
-                provider.search(search_query, num=5), timeout=6.0
+                provider.search(search_query, num=6), timeout=7.0
             )
-            all_results.extend(results)
+            for r in results:
+                url = r.url
+                if url:
+                    all_results.append(SearchResult(url=url, title=r.title, snippet=r.snippet))
             if len(all_results) >= 5:
                 break
-        except Exception:
+        except Exception as e:
+            orchestrator_logger.warning(f"Provider {provider.name} failed: {e}")
             continue
 
     # Deduplicate
     seen = set()
     deduped = []
     for r in all_results:
-        url = r.url if hasattr(r, 'url') else getattr(r, 'url', '')
+        url = r.url
         if url and url not in seen:
             seen.add(url)
             deduped.append(r)
@@ -195,8 +198,28 @@ async def step_fetch(report_id: str):
     urls = [r["url"] for r in search_results[:5] if r.get("url")]
     fetched_pages = await fetch_pages(urls, max_concurrent=3, timeout=8.0)
 
-    pages_data = [{"url": p["url"], "title": p["title"], "text_content": p["text_content"],
-                   "fetch_success": p["fetch_success"]} for p in fetched_pages]
+    success_count = sum(1 for p in fetched_pages if p["fetch_success"])
+
+    # If no pages were fetched, use search snippets as fallback content
+    if success_count == 0:
+        fetched_pages = []
+        for r in search_results:
+            snippet = r.get("snippet", "")
+            if snippet and len(snippet) > 30:
+                fetched_pages.append({
+                    "url": r.get("url", ""),
+                    "title": r.get("title", ""),
+                    "text_content": snippet,
+                    "fetch_success": True,
+                })
+
+    pages_data = [{
+        "url": p["url"], "title": p.get("title",""),
+        "fetch_success": p.get("fetch_success", False),
+        "text_length": len(p.get("text_content","")) if p.get("fetch_success") else 0,
+        "text_preview": (p.get("text_content","") or "")[:200],
+        "error": p.get("error_message", ""),
+    } for p in fetched_pages]
 
     step_data = dict(sd)
     step_data["fetched_pages"] = pages_data
