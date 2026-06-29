@@ -133,19 +133,28 @@ async def step_search(report_id: str):
 
     manager = _build_search_manager()
     all_results = []
-    try:
-        all_results = await asyncio.wait_for(
-            manager.search(query, num=8), timeout=8.0
-        )
-    except asyncio.TimeoutError:
-        orchestrator_logger.warning("Search step timed out")
-        # Fallback: try just the original query
+
+    # Try each provider individually with short timeout
+    for provider in manager.providers:
         try:
-            all_results = await asyncio.wait_for(
-                manager.search(query, num=5), timeout=5.0
+            results = await asyncio.wait_for(
+                provider.search(query, num=5), timeout=6.0
             )
-        except asyncio.TimeoutError:
-            pass
+            all_results.extend(results)
+            if len(all_results) >= 5:
+                break
+        except Exception:
+            continue
+
+    # Deduplicate
+    seen = set()
+    deduped = []
+    for r in all_results:
+        url = r.url if hasattr(r, 'url') else getattr(r, 'url', '')
+        if url and url not in seen:
+            seen.add(url)
+            deduped.append(r)
+    all_results = deduped
 
     results_data = [{"title": r.title, "url": r.url, "snippet": r.snippet} for r in all_results]
 
