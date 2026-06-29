@@ -32,7 +32,15 @@ class Settings:
 
     # Application
     _raw_db_url: str = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./data/reports.db")
-    DATABASE_URL: str = _raw_db_url.replace("postgresql://", "postgresql+asyncpg://") if _raw_db_url.startswith("postgresql://") else _raw_db_url
+    DATABASE_URL: str = (
+        _raw_db_url
+        .replace("postgresql://", "postgresql+asyncpg://")
+        .replace("postgres://", "postgresql+asyncpg://")
+        .replace("?channel_binding=require", "")
+        .replace("&channel_binding=require", "")
+        .replace("?sslmode=require", "?ssl=require")
+        .replace("&sslmode=require", "&ssl=require")
+    ) if _raw_db_url.startswith("postgresql") or _raw_db_url.startswith("postgres") else _raw_db_url
     CACHE_TTL_HOURS: int = int(os.getenv("CACHE_TTL_HOURS", "168"))
     SEARCH_TIMEOUT_SECONDS: int = int(os.getenv("SEARCH_TIMEOUT_SECONDS", "120"))
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
