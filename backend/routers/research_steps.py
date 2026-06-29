@@ -16,7 +16,8 @@ from backend.services.search.baidu import BaiduSearch
 from backend.services.search.chinese_sources import ChineseOfficialSourceSearch
 from backend.services.search.base import SearchManager
 from backend.services.fetcher import fetch_pages
-from backend.services.extractor import extract_data_from_pages
+from backend.services.simple_extractor import extract_from_pages as extract_data_regex
+from backend.services.extractor import extract_data_from_pages as extract_data_llm
 from backend.services.verifier import verify_data_points
 from backend.services.citation import build_citations, format_inline_citation
 from backend.services.template_report import generate_template_report
@@ -224,14 +225,12 @@ async def step_extract(report_id: str):
     fetched_pages = sd.get("fetched_pages", [])
     entity_name = report.entity_name
 
+    # Use instant regex extraction (no LLM call, works within 10s limit)
     try:
-        data_points = await asyncio.wait_for(
-            extract_data_from_pages(fetched_pages, entity_name, max_concurrent=2),
-            timeout=12.0,
-        )
+        data_points = extract_data_regex(fetched_pages)
         verified = await verify_data_points(data_points)
     except Exception as e:
-        orchestrator_logger.warning(f"Extract failed: {e}")
+        orchestrator_logger.warning(f"Regex extract failed: {e}")
         verified = []
 
     step_data = dict(sd)
