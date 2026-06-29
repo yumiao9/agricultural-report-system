@@ -2,13 +2,13 @@
 
 import hashlib
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 from sqlalchemy import select, delete
 
 from backend.config import settings
 from backend.models.database import async_session_factory
-from backend.models.report import Report, SearchCache, DataPoint, Citation
+from backend.models.report import Report, SearchCache, DataPoint, Citation, utcnow
 from backend.utils.logger import orchestrator_logger
 
 
@@ -20,7 +20,7 @@ def _hash_query(query: str) -> str:
 async def get_cached_report(query: str) -> dict | None:
     """Look up a cached report by query. Returns None if not found or expired."""
     query_hash = _hash_query(query)
-    now = datetime.now(timezone.utc)
+    now = utcnow()
 
     async with async_session_factory() as session:
         result = await session.execute(
@@ -102,7 +102,7 @@ async def save_report_to_cache(
     import uuid
 
     query_hash = _hash_query(query)
-    now = datetime.now(timezone.utc)
+    now = utcnow()
     ttl_hours = settings.CACHE_TTL_HOURS
     expires_at = now + timedelta(hours=ttl_hours)
     report_id = uuid.uuid4().hex[:12]
@@ -163,7 +163,7 @@ async def save_report_to_cache(
 async def get_cached_search(query: str) -> list | None:
     """Look up cached search results."""
     query_hash = _hash_query(query)
-    now = datetime.now(timezone.utc)
+    now = utcnow()
 
     async with async_session_factory() as session:
         result = await session.execute(
@@ -181,7 +181,7 @@ async def get_cached_search(query: str) -> list | None:
 async def save_search_cache(query: str, results: list[dict]):
     """Save search results to cache (24 hours)."""
     query_hash = _hash_query(query)
-    now = datetime.now(timezone.utc)
+    now = utcnow()
     expires_at = now + timedelta(hours=24)
 
     async with async_session_factory() as session:

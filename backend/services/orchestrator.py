@@ -1,7 +1,6 @@
 """Central research orchestrator — coordinates the full pipeline."""
 
 import asyncio
-from datetime import datetime, timezone
 
 from backend.config import settings
 from backend.models.schemas import ENTITY_LABELS
@@ -22,6 +21,7 @@ from backend.services.cache import (
     get_cached_search,
     save_search_cache,
 )
+from backend.models.report import utcnow
 from backend.utils.logger import orchestrator_logger
 
 
@@ -120,7 +120,7 @@ class ResearchOrchestrator:
         Returns:
             Complete report dict ready for rendering.
         """
-        start_time = datetime.now(timezone.utc)
+        start_time = utcnow()
 
         # ── Step 0: Check Cache ──────────────────────────────────
         if not force_refresh:
@@ -283,7 +283,7 @@ class ResearchOrchestrator:
             confidence_score=round(confidence_score, 2),
         )
 
-        elapsed = (datetime.now(timezone.utc) - start_time).total_seconds()
+        elapsed = (utcnow() - start_time).total_seconds()
         orchestrator_logger.info(f"Report {report_id} generated in {elapsed:.1f}s")
 
         # Build response
@@ -314,8 +314,8 @@ class ResearchOrchestrator:
         progress: ProgressEmitter,
     ) -> dict:
         """Generate a minimal report when data collection fails."""
-        now = datetime.now(timezone.utc)
-        report_id = "fallback_" + now.strftime("%Y%m%d%H%M%S")
+        _now = utcnow()
+        report_id = "fallback_" + _now.strftime("%Y%m%d%H%M%S")
 
         entity_label = ENTITY_LABELS.get(entity_type, entity_type)
 
@@ -354,7 +354,7 @@ class ResearchOrchestrator:
             "sources_count": 0,
             "data_points_count": 0,
             "confidence_score": 0.0,
-            "created_at": now.strftime("%Y-%m-%d %H:%M"),
+            "created_at": _now.strftime("%Y-%m-%d %H:%M"),
             "citations": [],
             "data_points": [],
         }

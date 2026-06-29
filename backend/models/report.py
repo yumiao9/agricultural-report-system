@@ -10,7 +10,8 @@ from backend.models.database import Base
 
 
 def utcnow():
-    return datetime.now(timezone.utc)
+    """Return timezone-naive UTC datetime (compatible with asyncpg)."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 def generate_id():
