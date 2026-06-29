@@ -20,6 +20,7 @@ from backend.services.extractor import extract_data_from_pages
 from backend.services.verifier import verify_data_points
 from backend.services.citation import build_citations, format_inline_citation
 from backend.services.report_generator import generate_report_markdown
+from backend.services.orchestrator import TARGETED_QUERIES
 from backend.utils.logger import orchestrator_logger
 
 router = APIRouter()
@@ -27,10 +28,9 @@ router = APIRouter()
 
 def _build_search_manager() -> SearchManager:
     providers = [DuckDuckGoSearch()]
-    skip_extra = "VERCEL" in __import__("os").environ
-    if settings.ENABLE_CHINESE_OFFICIAL and not skip_extra:
+    if settings.ENABLE_CHINESE_OFFICIAL:
         providers.append(ChineseOfficialSourceSearch())
-    if settings.ENABLE_BAIDU and not skip_extra:
+    if settings.ENABLE_BAIDU:
         providers.append(BaiduSearch())
     return SearchManager(providers)
 
@@ -127,23 +127,25 @@ async def step_search(report_id: str):
     entity_name = report.entity_name
     query = sd.get("search_query_zh", report.query)
 
-    # On Vercel, use minimal queries for speed
-    is_vercel = "VERCEL" in __import__("os").environ
-    if is_vercel:
-        search_queries = [query, f"{entity_name} 产量 数据 2024"]
-    else:
-        templates = TARGETED_QUERIES.get(entity_type, TARGETED_QUERIES["agricultural_product"])
-        search_queries = [tpl.format(entity=entity_name) for tpl in templates[:3]]
-        search_queries.insert(0, query)
+    templates = TARGETED_QUERIES.get(entity_type, TARGETED_QUERIES["agricultural_product"])
+    search_queries = [tpl.format(entity=entity_name) for tpl in templates[:2]]
+    search_queries.insert(0, query)
 
     manager = _build_search_manager()
     all_results = []
     try:
         all_results = await asyncio.wait_for(
-            manager.search(query, num=6), timeout=8.0
+            manager.search(query, num=8), timeout=8.0
         )
     except asyncio.TimeoutError:
         orchestrator_logger.warning("Search step timed out")
+        # Fallback: try just the original query
+        try:
+            all_results = await asyncio.wait_for(
+                manager.search(query, num=5), timeout=5.0
+            )
+        except asyncio.TimeoutError:
+            pass
 
     results_data = [{"title": r.title, "url": r.url, "snippet": r.snippet} for r in all_results]
 
