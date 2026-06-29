@@ -1,60 +1,56 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}农业报告产出系统{% endblock %}</title>
-    <!-- Tailwind CSS standalone -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#2D6A4F',
-                        secondary: '#52B788',
-                        accent: '#D4A373',
-                        bg: '#FEFEE3',
-                    }
-                }
-            }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}农业报告产出系统{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: { DEFAULT: '#2D6A4F', 50: '#edf7f2', 100: '#d5efe3', 200: '#aedfc9', 300: '#7ccbab', 400: '#52b788', 500: '#2d6a4f', 600: '#1b4332', 700: '#143a2a', 800: '#0d2c20', 900: '#061a12' },
+            accent: { DEFAULT: '#d4a373', 50: '#fdf8f3', 100: '#faefe3', 200: '#f3dcc4', 300: '#e8c49e', 400: '#d4a373', 500: '#c08a5a', 600: '#a06d42', 700: '#7d5535', 800: '#5e4028', 900: '#3f2a1a' },
+          },
+          fontFamily: { sans: ['"Noto Sans SC"', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif'] },
         }
-    </script>
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Marked.js for markdown rendering -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="/static/css/custom.css">
-    {% block head %}{% endblock %}
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="/static/css/custom.css">
 </head>
-<body class="min-h-screen bg-gradient-to-b from-bg to-white">
-    <!-- Navigation -->
-    <nav class="bg-primary text-white shadow-lg">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/" class="text-xl font-bold tracking-wide flex items-center gap-2">
-                <span class="text-2xl">🌾</span>
-                <span>农业报告产出系统</span>
-            </a>
-            <div class="flex gap-4 text-sm">
-                <a href="/" class="hover:text-accent transition">首页</a>
-                <a href="/history" class="hover:text-accent transition">历史报告</a>
-            </div>
+<body class="min-h-screen bg-gradient-to-br from-gray-50 to-white antialiased">
+  <!-- Nav -->
+  <nav class="sticky top-0 z-50 glass-card border-b border-gray-100/60">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="flex items-center gap-2.5 group">
+          <span class="text-2xl">🌾</span>
+          <span class="text-lg font-bold text-primary group-hover:text-primary-600 transition">农业报告产出系统</span>
+        </a>
+        <div class="flex items-center gap-1">
+          <a href="/" class="px-3 py-2 text-sm text-gray-600 hover:text-primary hover:bg-primary-50 rounded-lg transition">首页</a>
+          <a href="/history" class="px-3 py-2 text-sm text-gray-600 hover:text-primary hover:bg-primary-50 rounded-lg transition">历史报告</a>
         </div>
-    </nav>
+      </div>
+    </div>
+  </nav>
 
-    <!-- Main content -->
-    <main class="max-w-6xl mx-auto px-4 py-6">
-        {% block content %}{% endblock %}
-    </main>
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+    {% block content %}{% endblock %}
+  </main>
 
-    <!-- Footer -->
-    <footer class="text-center text-gray-500 text-xs py-8 border-t border-gray-200 mt-12">
-        <p>农业报告产出系统 — 基于公开数据自动生成，仅供参考</p>
-        <p class="mt-1">数据来源：百度搜索、DuckDuckGo、农业农村部 (moa.gov.cn)、国家统计局 (stats.gov.cn) 等公开网络信息</p>
-        <p class="mt-1">每个数据点均标注来源链接，支持溯源验证</p>
-    </footer>
+  <footer class="text-center py-10 mt-16 border-t border-gray-100">
+    <p class="text-xs text-gray-400">农业报告产出系统 · 基于公开数据自动生成</p>
+    <p class="text-xs text-gray-400 mt-1">数据来源：百度搜索、农业农村部、国家统计局、百度百科等公开网络信息</p>
+  </footer>
 
-    <script src="/static/js/app.js"></script>
-    {% block scripts %}{% endblock %}
+  <script src="/static/js/app.js"></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

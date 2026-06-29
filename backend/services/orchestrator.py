@@ -132,7 +132,7 @@ class ResearchOrchestrator:
                 return cached
 
         # ── Step 1: Classify Entity ──────────────────────────────
-        progress.emit("classifying", "正在分析查询类型...", percent=8)
+        progress.emit("classifying", "正在识别查询类型...", percent=8)
         try:
             classification = await asyncio.wait_for(
                 classify_entity(query), timeout=15.0
@@ -181,9 +181,8 @@ class ResearchOrchestrator:
                         search_queries,
                         num=settings.SEARCH_MAX_RESULTS // len(search_queries) + 2,
                     ),
-                    timeout=45.0,
+                    timeout=60.0,
                 )
-                # Cache search results
                 await save_search_cache(
                     query,
                     [{"title": r.title, "url": r.url, "snippet": r.snippet}
@@ -194,8 +193,7 @@ class ResearchOrchestrator:
                 all_search_results = all_search_results or []
 
         if not all_search_results:
-            progress.error("未找到任何相关信息，请尝试其他查询词")
-            # Return a minimal error report
+            progress.emit("searching", "搜索未返回结果，将生成简要报告", percent=15)
             return await self._generate_fallback_report(query, entity_type, entity_name, progress)
 
         orchestrator_logger.info(f"Search complete: {len(all_search_results)} total results")
@@ -208,8 +206,8 @@ class ResearchOrchestrator:
 
         success_count = sum(1 for p in fetched_pages if p["fetch_success"])
         if success_count == 0:
-            progress.error("所有网页获取失败，请检查网络连接")
-            return await self._generate_fallback_report(query, entity_type, entity_name, progress)
+            progress.emit("fetching", "网页获取失败，部分网站可能无法访问", percent=45)
+            # Continue with partial data if possible
 
         progress.emit("fetching", f"网页获取完成 ({success_count}/{len(urls)} 成功)", percent=45)
 
@@ -245,7 +243,7 @@ class ResearchOrchestrator:
         citations = build_citations(all_search_results, fetched_pages)
 
         # ── Step 7: Generate Report ──────────────────────────────
-        progress.emit("generating", "正在生成研究报告... (预计30-60秒)", percent=80)
+        progress.emit("generating", "正在生成研究报告...", percent=80)
 
         try:
             markdown = await asyncio.wait_for(
@@ -256,10 +254,14 @@ class ResearchOrchestrator:
                     fetched_pages=fetched_pages,
                     citations=citations,
                 ),
-                timeout=120.0,
+                timeout=180.0,
             )
         except asyncio.TimeoutError:
-            progress.error("报告生成超时")
+            progress.emit("error", "报告生成超时，请稍后重试")
+            return await self._generate_fallback_report(query, entity_type, entity_name, progress)
+        except Exception as e:
+            orchestrator_logger.error(f"Report generation failed: {e}")
+            progress.emit("error", "报告生成失败，将生成简化报告")
             return await self._generate_fallback_report(query, entity_type, entity_name, progress)
 
         # ── Step 8: Convert Markdown to HTML ────────────────────
