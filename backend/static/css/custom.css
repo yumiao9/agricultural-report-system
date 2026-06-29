@@ -1,0 +1,166 @@
+/* Custom styles for the Agricultural Report System */
+
+/* Report content styling */
+.report-content {
+    line-height: 1.9;
+    color: #333;
+}
+
+.report-content h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2D6A4F;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.report-content h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #2D6A4F;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.report-content h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #374151;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.report-content h4 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #4b5563;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.report-content p {
+    margin: 0.75rem 0;
+    text-indent: 0;
+}
+
+.report-content blockquote {
+    border-left: 4px solid #52B788;
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    background: #f9fafb;
+    border-radius: 0 0.5rem 0.5rem 0;
+    color: #555;
+}
+
+.report-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+}
+
+.report-content th {
+    background: #f0fdf4;
+    color: #2D6A4F;
+    font-weight: 600;
+    padding: 0.6rem 0.75rem;
+    text-align: left;
+    border: 1px solid #d1d5db;
+}
+
+.report-content td {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #e5e7eb;
+}
+
+.report-content tr:nth-child(even) td {
+    background: #fafafa;
+}
+
+.report-content ul, .report-content ol {
+    margin: 0.5rem 0 0.5rem 1.5rem;
+}
+
+.report-content li {
+    margin: 0.25rem 0;
+}
+
+.report-content code {
+    background: #f3f4f6;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.9em;
+}
+
+.report-content pre {
+    background: #1f2937;
+    color: #e5e7eb;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 1rem 0;
+}
+
+.report-content hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 2rem 0;
+}
+
+.report-content a {
+    color: #2D6A4F;
+    text-decoration: underline;
+}
+
+.report-content a:hover {
+    color: #1b4332;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Print styles */
+@media print {
+    nav, footer, .no-print {
+        display: none !important;
+    }
+    .report-content {
+        max-width: 100%;
+    }
+}
+
+/* Loading animation */
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 5px rgba(45, 106, 79, 0.2); }
+    50% { box-shadow: 0 0 20px rgba(45, 106, 79, 0.4); }
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Toast notification */
+.toast {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 100;
+    animation: slide-up 0.3s ease-out;
+}
+
+@keyframes slide-up {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

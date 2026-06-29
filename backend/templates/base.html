@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}农业报告产出系统{% endblock %}</title>
+    <!-- Tailwind CSS standalone -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2D6A4F',
+                        secondary: '#52B788',
+                        accent: '#D4A373',
+                        bg: '#FEFEE3',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Marked.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="/static/css/custom.css">
+    {% block head %}{% endblock %}
+</head>
+<body class="min-h-screen bg-gradient-to-b from-bg to-white">
+    <!-- Navigation -->
+    <nav class="bg-primary text-white shadow-lg">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="/" class="text-xl font-bold tracking-wide flex items-center gap-2">
+                <span class="text-2xl">🌾</span>
+                <span>农业报告产出系统</span>
+            </a>
+            <div class="flex gap-4 text-sm">
+                <a href="/" class="hover:text-accent transition">首页</a>
+                <a href="/history" class="hover:text-accent transition">历史报告</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="max-w-6xl mx-auto px-4 py-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-gray-500 text-xs py-8 border-t border-gray-200 mt-12">
+        <p>农业报告产出系统 — 基于公开数据自动生成，仅供参考</p>
+        <p class="mt-1">数据来源：百度搜索、DuckDuckGo、农业农村部 (moa.gov.cn)、国家统计局 (stats.gov.cn) 等公开网络信息</p>
+        <p class="mt-1">每个数据点均标注来源链接，支持溯源验证</p>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

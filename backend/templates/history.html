@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}历史报告 — 农业报告产出系统{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="text-3xl font-bold text-primary">📋 历史报告</h1>
+        <a href="/" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-green-800 transition shadow-sm">
+            🔍 新建研究
+        </a>
+    </div>
+
+    {% if reports %}
+    <div class="space-y-4">
+        {% for report in reports %}
+        <a href="/report/{{ report.id }}"
+           class="block bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-primary/30 transition">
+            <div class="flex items-center justify-between flex-wrap gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">
+                        {% if report.entity_type == 'agricultural_product' %}🌾
+                        {% elif report.entity_type == 'agricultural_enterprise' %}🏢
+                        {% elif report.entity_type == 'agricultural_region' %}🏘️
+                        {% else %}⚙️
+                        {% endif %}
+                    </span>
+                    <div>
+                        <h3 class="font-semibold text-gray-800 text-lg">{{ report.query }}</h3>
+                        <div class="flex items-center gap-3 text-sm text-gray-500 mt-0.5">
+                            <span class="bg-gray-100 px-2 py-0.5 rounded-full text-xs">{{ report.entity_type_label }}</span>
+                            <span>{{ report.data_points_count }} 项数据</span>
+                            <span>{{ report.sources_count }} 来源</span>
+                            <span>置信度 {{ (report.confidence_score * 100)|round|int }}%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-right text-sm text-gray-400">
+                    {{ report.created_at }}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20">
+        <div class="text-6xl mb-4">📭</div>
+        <h2 class="text-xl text-gray-600 mb-2">暂无历史报告</h2>
+        <p class="text-gray-400 mb-6">去首页开始第一次研究吧</p>
+        <a href="/" class="px-6 py-3 bg-primary text-white rounded-xl hover:bg-green-800 transition shadow-md inline-block">
+            🔍 开始研究
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

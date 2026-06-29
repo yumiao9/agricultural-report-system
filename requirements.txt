@@ -1,0 +1,35 @@
+# Web framework
+fastapi>=0.138.0
+uvicorn[standard]>=0.49.0
+jinja2>=3.1.0
+
+# Async HTTP & scraping
+httpx>=0.28.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+
+# Database
+sqlalchemy[asyncio]>=2.0.0
+aiosqlite>=0.20.0
+
+# Web search
+duckduckgo-search>=7.0.0
+
+# LLM
+openai>=2.0.0
+
+# Config
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+python-dotenv>=1.0.0
+
+# Markdown rendering
+markdown>=3.5.0
+pymdown-extensions>=10.0.0
+
+# PDF export
+weasyprint>=62.0.0
+
+# Testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
