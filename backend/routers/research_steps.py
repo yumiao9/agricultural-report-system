@@ -27,9 +27,10 @@ router = APIRouter()
 
 def _build_search_manager() -> SearchManager:
     providers = [DuckDuckGoSearch()]
-    if settings.ENABLE_CHINESE_OFFICIAL:
+    skip_extra = "VERCEL" in __import__("os").environ
+    if settings.ENABLE_CHINESE_OFFICIAL and not skip_extra:
         providers.append(ChineseOfficialSourceSearch())
-    if settings.ENABLE_BAIDU:
+    if settings.ENABLE_BAIDU and not skip_extra:
         providers.append(BaiduSearch())
     return SearchManager(providers)
 
@@ -126,15 +127,20 @@ async def step_search(report_id: str):
     entity_name = report.entity_name
     query = sd.get("search_query_zh", report.query)
 
-    templates = TARGETED_QUERIES.get(entity_type, TARGETED_QUERIES["agricultural_product"])
-    search_queries = [tpl.format(entity=entity_name) for tpl in templates[:3]]
-    search_queries.insert(0, query)
+    # On Vercel, use minimal queries for speed
+    is_vercel = "VERCEL" in __import__("os").environ
+    if is_vercel:
+        search_queries = [query, f"{entity_name} 产量 数据 2024"]
+    else:
+        templates = TARGETED_QUERIES.get(entity_type, TARGETED_QUERIES["agricultural_product"])
+        search_queries = [tpl.format(entity=entity_name) for tpl in templates[:3]]
+        search_queries.insert(0, query)
 
     manager = _build_search_manager()
     all_results = []
     try:
         all_results = await asyncio.wait_for(
-            manager.multisearch(search_queries, num=5), timeout=20.0
+            manager.search(query, num=6), timeout=8.0
         )
     except asyncio.TimeoutError:
         orchestrator_logger.warning("Search step timed out")
@@ -166,8 +172,8 @@ async def step_fetch(report_id: str):
     sd = report.step_data or {}
     search_results = sd.get("search_results", [])
 
-    urls = [r["url"] for r in search_results[:5]]
-    fetched_pages = await fetch_pages(urls, max_concurrent=3, timeout=8.0)
+    urls = [r["url"] for r in search_results[:3]]
+    fetched_pages = await fetch_pages(urls, max_concurrent=2, timeout=6.0)
 
     pages_data = [{"url": p["url"], "title": p["title"], "text_content": p["text_content"],
                    "fetch_success": p["fetch_success"]} for p in fetched_pages]
@@ -199,7 +205,7 @@ async def step_extract(report_id: str):
     fetched_pages = sd.get("fetched_pages", [])
     entity_name = report.entity_name
 
-    data_points = await extract_data_from_pages(fetched_pages, entity_name, max_concurrent=2)
+    data_points = await extract_data_from_pages(fetched_pages, entity_name, max_concurrent=1)
     verified = await verify_data_points(data_points)
 
     step_data = dict(sd)
@@ -252,11 +258,26 @@ async def step_generate(report_id: str):
         import asyncio
         markdown = await asyncio.wait_for(
             generate_report_markdown(entity_name, entity_type, data_points, fetched_pages, citations),
-            timeout=30.0,
+            timeout=15.0,
         )
     except Exception as e:
         orchestrator_logger.error(f"Generate failed: {e}")
-        markdown = f"# {entity_name} 研究报告\n\n数据生成失败，请稍后重试。"
+        dp_list = "\n".join(
+            f"- {dp.get('indicator', '')}: {dp.get('value_text', '')} ({dp.get('year', '')})"
+            for dp in data_points[:10]
+        ) if data_points else "暂无提取数据"
+        cite_list = "\n".join(
+            f"- [{c['ref_number']}] {c.get('title', '')}: {c.get('url', '')}"
+            for c in citations[:10]
+        ) if citations else "暂无来源"
+        markdown = (
+            f"# {entity_name} 研究报告\n\n"
+            f"## 数据概览\n"
+            f"本次检索共收集到 {len(data_points)} 项数据点，来自 {len(citations)} 个信息来源。\n\n"
+            f"## 提取的数据\n{dp_list}\n\n"
+            f"## 信息来源\n{cite_list}\n\n"
+            "> 注：报告由AI自动生成。部分章节因模型调用超时未完整生成。"
+        )
 
     html_content = md_lib.markdown(
         markdown,
