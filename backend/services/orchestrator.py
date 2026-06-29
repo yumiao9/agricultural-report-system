@@ -137,12 +137,14 @@ class ResearchOrchestrator:
             classification = await asyncio.wait_for(
                 classify_entity(query), timeout=15.0
             )
-        except asyncio.TimeoutError:
-            progress.error("实体分类超时，请检查网络和API配置")
-            raise
-        except RuntimeError as e:
-            progress.error(f"LLM API 未配置: {e}")
-            raise
+        except Exception as e:
+            orchestrator_logger.warning(f"Entity classification failed ({e}), defaulting to product")
+            classification = {
+                "entity_type": "agricultural_product",
+                "entity_name": query,
+                "keywords": [query],
+                "search_query_zh": query,
+            }
 
         entity_type = classification["entity_type"]
         entity_name = classification.get("entity_name", query)

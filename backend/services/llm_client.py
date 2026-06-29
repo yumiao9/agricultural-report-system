@@ -6,12 +6,14 @@ from openai import AsyncOpenAI
 from backend.config import settings
 from backend.utils.logger import llm_logger
 
-# DeepSeek client (primary)
+# DeepSeek client (primary) with proper timeout
 deepseek_client = None
 if settings.DEEPSEEK_API_KEY:
     deepseek_client = AsyncOpenAI(
         api_key=settings.DEEPSEEK_API_KEY,
         base_url=settings.DEEPSEEK_BASE_URL,
+        timeout=60.0,
+        max_retries=2,
     )
 
 
