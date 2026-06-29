@@ -1,0 +1,51 @@
+{
+  "id": "80a08f86c362",
+  "query": "牛油果",
+  "entity_type": "agricultural_product",
+  "entity_type_label": "农产品",
+  "entity_name": "牛油果",
+  "markdown_content": "# 牛油果 研究报告\n\n## 数据概览\n本次检索共收集到 0 项数据点，来自 5 个信息来源。\n\n## 提取的数据\n暂无提取数据\n\n## 信息来源\n- [1] Earle B MacKay (unknown-1965) - Find a Grave Memorial: https://www.findagrave.com/memorial/153852907/earle_b-mackay\n- [2] The Times Herald (Friday, June 5, 1959) - Port Huron, Michigan | Page ...: https://www.newspapers.com/newspage/209907600/?msockid=308159d918896f70196f4e5e195b6e9c\n- [3] Earle Bowers Mackay - Ancestry®: https://www.ancestry.com/genealogy/records/earle-bowers-mackay-24-kcz0dq?msockid=308159d918896f70196f4e5e195b6e9c\n- [4] Kenneth John Mackay (1895–1961) • FamilySearch: https://ancestors.familysearch.org/en/L13R-VWV/kenneth-john-mackay-1895-1961\n- [5] St. Clair County & Port Huron MI Obituaries 125+ indexes: https://www.newspaperobituaries.net/michigan/saint-clair-county/index.html\n\n> 注：报告由AI自动生成。部分章节因模型调用超时未完整生成。",
+  "html_content": "<h1 id=\"_1\">牛油果 研究报告</h1>\n<h2 id=\"_2\">数据概览</h2>\n<p>本次检索共收集到 0 项数据点，来自 5 个信息来源。</p>\n<h2 id=\"_3\">提取的数据</h2>\n<p>暂无提取数据</p>\n<h2 id=\"_4\">信息来源</h2>\n<ul>\n<li>[1] Earle B MacKay (unknown-1965) - Find a Grave Memorial: https://www.findagrave.com/memorial/153852907/earle_b-mackay</li>\n<li>[2] The Times Herald (Friday, June 5, 1959) - Port Huron, Michigan | Page ...: https://www.newspapers.com/newspage/209907600/?msockid=308159d918896f70196f4e5e195b6e9c</li>\n<li>[3] Earle Bowers Mackay - Ancestry®: https://www.ancestry.com/genealogy/records/earle-bowers-mackay-24-kcz0dq?msockid=308159d918896f70196f4e5e195b6e9c</li>\n<li>[4] Kenneth John Mackay (1895–1961) • FamilySearch: https://ancestors.familysearch.org/en/L13R-VWV/kenneth-john-mackay-1895-1961</li>\n<li>[5] St. Clair County &amp; Port Huron MI Obituaries 125+ indexes: https://www.newspaperobituaries.net/michigan/saint-clair-county/index.html</li>\n</ul>\n<blockquote>\n<p>注：报告由AI自动生成。部分章节因模型调用超时未完整生成。</p>\n</blockquote>",
+  "sources_count": 5,
+  "data_points_count": 0,
+  "confidence_score": 0.0,
+  "created_at": "2026-06-29 13:13",
+  "citations": [
+    {
+      "ref_number": 1,
+      "title": "Earle B MacKay (unknown-1965) - Find a Grave Memorial",
+      "url": "https://www.findagrave.com/memorial/153852907/earle_b-mackay",
+      "snippet": "Earle B MacKay Birth unknown Death Oct 1965 Burial Lakeside Cemetery Port Huron, St. Clair County, Michigan, USA Add to Map Plot Block X, Lot 112, Grave 7 Memorial ID 153852907 · View Source",
+      "access_date": "2026-06-29"
+    },
+    {
+      "ref_number": 2,
+      "title": "The Times Herald (Friday, June 5, 1959) - Port Huron, Michigan | Page ...",
+      "url": "https://www.newspapers.com/newspage/209907600/?msockid=308159d918896f70196f4e5e195b6e9c",
+      "snippet": "A Publisher Extra® Newspaper Publication: The Times Herald Location: Port Huron, Michigan Issue Date: Friday, June 5, 1959 Page: 13 Start Free Trial",
+      "access_date": "2026-06-29"
+    },
+    {
+      "ref_number": 3,
+      "title": "Earle Bowers Mackay - Ancestry®",
+      "url": "https://www.ancestry.com/genealogy/records/earle-bowers-mackay-24-kcz0dq?msockid=308159d918896f70196f4e5e195b6e9c",
+      "snippet": "Earle Bowers Mackay born 1889 in Port Huron, St Clair, Michigan genealogy record - Ancestry®.",
+      "access_date": "2026-06-29"
+    },
+    {
+      "ref_number": 4,
+      "title": "Kenneth John Mackay (1895–1961) • FamilySearch",
+      "url": "https://ancestors.familysearch.org/en/L13R-VWV/kenneth-john-mackay-1895-1961",
+      "snippet": "Discover life events, stories and photos about Kenneth John Mackay (1895–1961) of Port Huron, St. Clair, Michigan, United States.",
+      "access_date": "2026-06-29"
+    },
+    {
+      "ref_number": 5,
+      "title": "St. Clair County & Port Huron MI Obituaries 125+ indexes",
+      "url": "https://www.newspaperobituaries.net/michigan/saint-clair-county/index.html",
+      "snippet": "browse over 125 St. Clair County and Port Huron, Michigan obituary indexes, including newspaper obituaries, death indexes, funeral home obituaries..",
+      "access_date": "2026-06-29"
+    }
+  ],
+  "data_points": []
+}

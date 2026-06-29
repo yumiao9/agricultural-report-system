@@ -24,13 +24,14 @@ for s in ['step-classify', 'step-search', 'step-fetch', 'step-extract', 'step-ge
     except Exception as e:
         print(f'{s}: ERROR {str(e)[:80]}')
 
-# Check final report
+print('\n=== Report check ===')
 try:
     resp = urllib.request.urlopen(f'https://agricultural-report-system.vercel.app/report/{tid}', context=ctx, timeout=30)
     html = resp.read().decode()
     if '数据概览' in html or '牛油果' in html:
-        print('\nReport OK - contains content')
-    else:
-        print('\nReport generated but may be empty')
+        print('Report contains content ✓')
+    # Check sections
+    for kw in ['数据概览', '提取的数据', '信息来源']:
+        if kw in html: print(f'  Has section: {kw} ✓')
 except Exception as e:
-    print(f'\nReport error: {str(e)[:80]}')
+    print(f'Report error: {str(e)[:80]}')

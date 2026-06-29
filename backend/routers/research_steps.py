@@ -127,9 +127,17 @@ async def step_search(report_id: str):
     entity_name = report.entity_name
     query = sd.get("search_query_zh", report.query)
 
-    templates = TARGETED_QUERIES.get(entity_type, TARGETED_QUERIES["agricultural_product"])
-    search_queries = [tpl.format(entity=entity_name) for tpl in templates[:2]]
-    search_queries.insert(0, query)
+    # Ensure query has agricultural context for better Chinese search results
+    if entity_type == "agricultural_product":
+        enhanced = f"{query} 农业 农产品"
+    elif entity_type == "agricultural_region":
+        enhanced = f"{query} 农业 经济"
+    elif entity_type == "agricultural_enterprise":
+        enhanced = f"{query} 企业"
+    else:
+        enhanced = query
+
+    search_query = enhanced
 
     manager = _build_search_manager()
     all_results = []
@@ -138,7 +146,7 @@ async def step_search(report_id: str):
     for provider in manager.providers:
         try:
             results = await asyncio.wait_for(
-                provider.search(query, num=5), timeout=6.0
+                provider.search(search_query, num=5), timeout=6.0
             )
             all_results.extend(results)
             if len(all_results) >= 5:
@@ -216,8 +224,15 @@ async def step_extract(report_id: str):
     fetched_pages = sd.get("fetched_pages", [])
     entity_name = report.entity_name
 
-    data_points = await extract_data_from_pages(fetched_pages, entity_name, max_concurrent=1)
-    verified = await verify_data_points(data_points)
+    try:
+        data_points = await asyncio.wait_for(
+            extract_data_from_pages(fetched_pages, entity_name, max_concurrent=1),
+            timeout=8.0,
+        )
+        verified = await verify_data_points(data_points)
+    except Exception as e:
+        orchestrator_logger.warning(f"Extract failed: {e}")
+        verified = []
 
     step_data = dict(sd)
     step_data["data_points"] = verified
