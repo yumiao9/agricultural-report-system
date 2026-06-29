@@ -19,7 +19,7 @@ from backend.services.fetcher import fetch_pages
 from backend.services.extractor import extract_data_from_pages
 from backend.services.verifier import verify_data_points
 from backend.services.citation import build_citations, format_inline_citation
-from backend.services.report_generator import generate_report_markdown
+from backend.services.template_report import generate_template_report
 from backend.services.orchestrator import TARGETED_QUERIES
 from backend.utils.logger import orchestrator_logger
 
@@ -254,6 +254,7 @@ async def step_extract(report_id: str):
 @router.post("/research/{report_id}/step-generate")
 async def step_generate(report_id: str):
     import markdown as md_lib
+    from backend.models.schemas import ENTITY_LABELS
 
     report = await _get_report(report_id)
     if not report:
@@ -265,7 +266,6 @@ async def step_generate(report_id: str):
     data_points = sd.get("data_points", [])
     entity_name = report.entity_name
     entity_type = report.entity_type
-    query = report.query
 
     citations = build_citations(
         [type("obj", (object,), r) for r in search_results],
@@ -280,30 +280,15 @@ async def step_generate(report_id: str):
     confidence_score = (confidence_counts.get("high", 0) * 1.0 +
                         confidence_counts.get("medium", 0) * 0.5) / total
 
-    try:
-        import asyncio
-        markdown = await asyncio.wait_for(
-            generate_report_markdown(entity_name, entity_type, data_points, fetched_pages, citations),
-            timeout=15.0,
-        )
-    except Exception as e:
-        orchestrator_logger.error(f"Generate failed: {e}")
-        dp_list = "\n".join(
-            f"- {dp.get('indicator', '')}: {dp.get('value_text', '')} ({dp.get('year', '')})"
-            for dp in data_points[:10]
-        ) if data_points else "暂无提取数据"
-        cite_list = "\n".join(
-            f"- [{c['ref_number']}] {c.get('title', '')}: {c.get('url', '')}"
-            for c in citations[:10]
-        ) if citations else "暂无来源"
-        markdown = (
-            f"# {entity_name} 研究报告\n\n"
-            f"## 数据概览\n"
-            f"本次检索共收集到 {len(data_points)} 项数据点，来自 {len(citations)} 个信息来源。\n\n"
-            f"## 提取的数据\n{dp_list}\n\n"
-            f"## 信息来源\n{cite_list}\n\n"
-            "> 注：报告由AI自动生成。部分章节因模型调用超时未完整生成。"
-        )
+    # Use template generator (fast, no LLM call)
+    type_label = ENTITY_LABELS.get(entity_type, entity_type)
+    markdown = generate_template_report(
+        entity_name=entity_name,
+        entity_type=entity_type,
+        entity_type_label=type_label,
+        data_points=data_points,
+        citations=citations,
+    )
 
     html_content = md_lib.markdown(
         markdown,
